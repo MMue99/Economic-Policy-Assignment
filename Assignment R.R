@@ -13,6 +13,8 @@
 library (haven)
 library(ggplot2)
 library(tidyverse)
+library(sandwich)
+library(lmtest)
 
 #Data Import --------
 carbontax_data <- read_dta("Data/carbontax_fullsample_data.dta")
@@ -47,6 +49,37 @@ carbontax_working <- carbontax_working %>%
 
 ##Creating Regressions -----
 
-#reg1 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator, data = carbontax_working)
-#summary(reg1)
+reg1 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = carbontax_working)
+summary(reg1) #using non robust standard errors
+coeftest(reg1, vcov = vcovHAC(reg1)) #using heteroskedasticity and autocorrelation-consistent standard errors
+#with robust standard errors variables are a lot less significant overall
+#Treatment Dummy is highly significant
+#sweden_indicator is NA because there are too many dummy variables
+
+
+reg2_sample <- carbontax_working %>%
+  filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Germany" | country == "France" | country == "Denmark")
+
+reg2 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = reg2_sample)
+summary(reg2)
+coeftest(reg2, vcov = vcovHAC(reg2)) #using robust standard errors
+#Treatment Dummy is highly significant but lower in value
+
+
+reg3_sample <- carbontax_working %>%
+  filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
+
+reg3 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = reg3_sample)
+summary(reg3)
+coeftest(reg3, vcov = vcovHAC(reg3))
+#Treatment Dummy is still significant
+
+
+reg4_sample <- carbontax_working %>%
+  filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
+
+reg4 <- lm(CO2_transport_capita ~ country + year + sweden_indicator + post_indicator + post_indicator*sweden_indicator, data = reg4_sample)
+summary(reg4)
+coeftest(reg4, vcov = vcovHAC(reg4))
+#Treatment Dummy is still significant
 
