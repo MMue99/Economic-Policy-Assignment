@@ -8,14 +8,24 @@
 #Lionel Lütgering
 
 
+#Libraries --------
 #install.packages("haven")
 library (haven)
 library(ggplot2)
+<<<<<<< HEAD
 library(dplyr)
+=======
+library(tidyverse)
+library(sandwich)
+library(lmtest)
+
+#Data Import --------
+>>>>>>> 21bd320d687f204c334c9f14b29e829a0288feca
 carbontax_data <- read_dta("Data/carbontax_fullsample_data.dta")
 CO2_data <- read_dta("Data/CO2_Graph.dta")
 
 
+#Nr. 2 ------
 figure_3 <- ggplot2::ggplot(data = CO2_data,
                             mapping = aes(year)
                             )+
@@ -63,5 +73,57 @@ task_3_plot_2 <- ggplot2::ggplot(data=carbontax_data_sample_no_swe,
 
 task_3_plot_2
 
+<<<<<<< HEAD
 
 
+=======
+figure_3
+
+
+#Nr. 5 -----
+##Generating Indicator Variables---------
+
+carbontax_working <- carbontax_data
+carbontax_working <- carbontax_working %>%
+  mutate(sweden_indicator = ifelse(country == "Sweden", 1, 0))
+
+carbontax_working <- carbontax_working %>%
+  mutate(post_indicator = ifelse(year >= 1990, 1, 0))
+
+##Creating Regressions -----
+
+reg1 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = carbontax_working)
+summary(reg1) #using non robust standard errors
+coeftest(reg1, vcov = vcovHAC(reg1)) #using heteroskedasticity and autocorrelation-consistent standard errors
+#with robust standard errors variables are a lot less significant overall
+#Treatment Dummy is highly significant
+#sweden_indicator is NA because there are too many dummy variables
+
+
+reg2_sample <- carbontax_working %>%
+  filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Germany" | country == "France" | country == "Denmark")
+
+reg2 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = reg2_sample)
+summary(reg2)
+coeftest(reg2, vcov = vcovHAC(reg2)) #using robust standard errors
+#Treatment Dummy is highly significant but lower in value
+
+
+reg3_sample <- carbontax_working %>%
+  filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
+
+reg3 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = reg3_sample)
+summary(reg3)
+coeftest(reg3, vcov = vcovHAC(reg3))
+#Treatment Dummy is still significant
+
+
+reg4_sample <- carbontax_working %>%
+  filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
+
+reg4 <- lm(CO2_transport_capita ~ country + year + sweden_indicator + post_indicator + post_indicator*sweden_indicator, data = reg4_sample)
+summary(reg4)
+coeftest(reg4, vcov = vcovHAC(reg4))
+#Treatment Dummy is still significant
+
+>>>>>>> 21bd320d687f204c334c9f14b29e829a0288feca
