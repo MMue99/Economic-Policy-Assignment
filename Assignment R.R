@@ -12,15 +12,13 @@
 #install.packages("haven")
 library (haven)
 library(ggplot2)
-<<<<<<< HEAD
 library(dplyr)
-=======
+
 library(tidyverse)
 library(sandwich)
 library(lmtest)
 
 #Data Import --------
->>>>>>> 21bd320d687f204c334c9f14b29e829a0288feca
 carbontax_data <- read_dta("Data/carbontax_fullsample_data.dta")
 CO2_data <- read_dta("Data/CO2_Graph.dta")
 
@@ -40,44 +38,36 @@ figure_3 <- ggplot2::ggplot(data = CO2_data,
 figure_3
 
 
+#Nr. 3 -------
+
 carbontax_data_sample <- carbontax_data%>%
   filter(country=="Sweden" |country=="Denmark"|country=="Finland"|
-           country=="Norway"|country=="Germany"|country=="France")%>%
-  glimpse()
+           country=="Norway"|country=="Germany"|country=="France")
+
+summary(carbontax_data_sample)
+glimpse(carbontax_data_sample)
+
+countries <- c("Sweden","Denmark","Finland","Norway","Germany","France")
+
+for(i in countries){
+  print(i)
+  carbontax_data_sample%>%
+    filter(country == i)%>%
+    glimpse()
+  }
+
 
 task_3_plot_1 <- ggplot2::ggplot(data=carbontax_data_sample,
                                  aes(year,CO2_transport_capita,
+                                     group = country,
                                      color = country))+
-  geom_point()+
-  geom_smooth(se = F)
+  geom_smooth(se=F,linetype = "dashed",size=0.15)+#dashed line that shows prediction of regression for each country
+  geom_line()+#straight line that connects data points of each country
+  geom_vline(xintercept = 1990, linetype = "dotted",size=0.2)#Sweden Treatment
 
 task_3_plot_1
 
 
-
-carbontax_data_sample_no_swe <- carbontax_data%>%
-  filter(country=="Denmark"|country=="Finland"|
-           country=="Norway"|country=="Germany"|country=="France")%>%
-  glimpse()
-
-carbontax_data_sample_swe <- carbontax_data%>%
-  filter(country=="Sweden")%>%
-  glimpse()
-
-
-task_3_plot_2 <- ggplot2::ggplot(data=carbontax_data_sample_no_swe,
-                                 aes(year,CO2_transport_capita))+
-  geom_point()+
-  geom_point(data=carbontax_data_sample_swe, color = "orange")
-  #geom_smooth(se = F)
-
-task_3_plot_2
-
-<<<<<<< HEAD
-
-
-=======
-figure_3
 
 
 #Nr. 5 -----
@@ -125,5 +115,3 @@ reg4 <- lm(CO2_transport_capita ~ country + year + sweden_indicator + post_indic
 summary(reg4)
 coeftest(reg4, vcov = vcovHAC(reg4))
 #Treatment Dummy is still significant
-
->>>>>>> 21bd320d687f204c334c9f14b29e829a0288feca
