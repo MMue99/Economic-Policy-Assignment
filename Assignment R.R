@@ -49,12 +49,73 @@ glimpse(carbontax_data_sample)
 
 countries <- c("Sweden","Denmark","Finland","Norway","Germany","France")
 
-for(i in countries){
-  print(i)
-  carbontax_data_sample%>%
-    filter(country == i)%>%
-    glimpse()
+
+carbontax_data_sample_pre <- carbontax_data_sample %>%
+  filter(year <= 1989 & year >= 1980)
+
+carbontax_data_sample_post <- carbontax_data_sample %>%
+  filter(year > 1990 & year <=2000)
+
+avg_table_pre <- matrix(c(1:36), ncol=6, byrow=TRUE)
+colnames(avg_table_pre) <- c('Sweden','Denmark','Finland','Norway','Germany','France')
+rownames(avg_table_pre) <- c('CO2 from transport','GDP per capita','Gasoline consumption per capita', 
+                         'Motor vehicles (per 1,000 people', 'Urban population','Population density')
+#avg_table_pre <- as.table(avg_table_pre)
+
+avg_table_post <- matrix(c(1:36), ncol=6, byrow=TRUE)
+colnames(avg_table_post) <- c('Sweden','Denmark','Finland','Norway','Germany','France')
+rownames(avg_table_post) <- c('CO2 from transport','GDP per capita','Gasoline consumption per capita', 
+                             'Motor vehicles (per 1,000 people', 'Urban population','Population density')
+#avg_table_post <- as.table(avg_table_post)
+
+#pre
+swe_df_pre <- carbontax_data_sample_pre%>%
+  filter(country == "Sweden")
+den_df_pre <- carbontax_data_sample_pre%>%
+  filter(country == "Denmark")
+fin_df_pre <- carbontax_data_sample_pre%>%
+  filter(country == "Finland")
+nor_df_pre <- carbontax_data_sample_pre%>%
+  filter(country == "Norway")
+ger_df_pre <- carbontax_data_sample_pre%>%
+  filter(country == "Germany")
+fra_df_pre <- carbontax_data_sample_pre%>%
+  filter(country == "France")
+
+#post
+swe_df_post <- carbontax_data_sample_post%>%
+  filter(country == "Sweden")
+den_df_post <- carbontax_data_sample_post%>%
+  filter(country == "Denmark")
+fin_df_post <- carbontax_data_sample_post%>%
+  filter(country == "Finland")
+nor_df_post <- carbontax_data_sample_post%>%
+  filter(country == "Norway")
+ger_df_post <- carbontax_data_sample_post%>%
+  filter(country == "Germany")
+fra_df_post <- carbontax_data_sample_post%>%
+  filter(country == "France")
+
+#pre
+for(i in 4:9){
+    avg_table_pre[i-3,1] = mean(swe_df_pre[[i]])
+    avg_table_pre[i-3,2] = mean(den_df_pre[[i]])
+    avg_table_pre[i-3,3] = mean(fin_df_pre[[i]])
+    avg_table_pre[i-3,4] = mean(nor_df_pre[[i]])
+    avg_table_pre[i-3,5] = mean(ger_df_pre[[i]])
+    avg_table_pre[i-3,6] = mean(fra_df_pre[[i]])
+    }
+
+#post
+for(i in 4:9){
+  avg_table_post[i-3,1] = mean(swe_df_post[[i]])
+  avg_table_post[i-3,2] = mean(den_df_post[[i]])
+  avg_table_post[i-3,3] = mean(fin_df_post[[i]])
+  avg_table_post[i-3,4] = mean(nor_df_post[[i]])
+  avg_table_post[i-3,5] = mean(ger_df_post[[i]])
+  avg_table_post[i-3,6] = mean(fra_df_post[[i]])
   }
+
 
 
 task_3_plot_1 <- ggplot2::ggplot(data=carbontax_data_sample,
