@@ -27,14 +27,19 @@ CO2_data <- read_dta("Data/CO2_Graph.dta")
 figure_3 <- ggplot2::ggplot(data = CO2_data,
                             mapping = aes(year)
                             )+
-  geom_line(aes(y=CO2_OECD), linetype = "dashed")+
-  geom_line(aes(y=CO2_Sweden))+
+  geom_line(aes(y=CO2_OECD,lty = 'OECD'))+
+  geom_line(aes(y=CO2_Sweden,lty='Sweden'))+
+  scale_linetype('Transport Sectors')+
   coord_cartesian(xlim = c(1960,2005), ylim = c(0.0,3.0),expand = FALSE)+
   xlab("")+
   ylab("Metric tons per capita (CO2 from transport)")+
   labs(title = "CARBON TAXES AND CO2 EMISSIONS")+
-  geom_vline(xintercept = 1990, linetype = "dotted",size=1)
-
+  geom_vline(xintercept = 1990, linetype = "dotted",size=1)+
+  annotate("text", x = 1984, y = 0.8, label = "VAT + Carbon Tax")+
+  theme(axis.line = element_line(size = 0.3,
+    linetype = "solid"), axis.text.y = element_text(size = 12,
+    vjust = 0.25), plot.title = element_text(family = "Helvetica"))+ 
+  labs(x = NULL)
 figure_3
 
 
