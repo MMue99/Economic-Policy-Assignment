@@ -11,6 +11,8 @@
 #Libraries --------
 #install.packages("haven")
 #install.packages("stargazer")
+#install.packages("sandwich")
+#install.packages("lmtest")
 library (haven)
 library(ggplot2)
 library(dplyr)
@@ -194,7 +196,8 @@ coeftest(reg1, vcov = vcovHAC(reg1)) #using heteroskedasticity and autocorrelati
 
 reg1_alter <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno- country, data = carbontax_working)
 summary(reg1_alter)
-robust_coef1 <- coeftest(reg1_alter, vcov = vcovHAC(reg1))
+robust_coef1 <- coeftest(reg1_alter, vcov = vcovHAC(reg1_alter))
+robust_coef1
 
 reg2_sample <- carbontax_working %>%
   filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Germany" | country == "France" | country == "Denmark")
