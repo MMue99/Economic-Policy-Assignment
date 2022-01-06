@@ -66,7 +66,7 @@ carbontax_data_sample_post <- carbontax_data_sample %>%
 
 avg_table_pre <- matrix(c(1:36), ncol=6, byrow=TRUE)
 colnames(avg_table_pre) <- c('Sweden','Denmark','Finland','Norway','Germany','France')
-rownames(avg_table_pre) <- c('CO2 from transport','GDP per capita','Gasoline consumption per capita', 
+rownames(avg_table_pre) <- c('CO2 from transport','GDP per capita (in 1,000)','Gasoline consumption per capita', 
 'Motor vehicles (per 1,000 people)', 'Urban population','Population density')
 
 
@@ -127,6 +127,7 @@ for(i in 4:9){
   }
 
 #AVG's from sample data from 1980 - 1989 (pre treatment)
+avg_table_pre[2,] <- avg_table_pre[2,]/1000
 avg_table_pre
 #AVG's from sample data from 1990 - 2000 (post treatment)
 avg_table_post
@@ -176,11 +177,22 @@ sample_avg <- sample_df%>%
   group_by(year)%>%
   do(mutate(., mean_CO2_transport = mean(.$CO2_transport_capita)))
 
+#new try
+sample_avg_ska <- sample_df%>%
+  filter(country == "Norway" | country == "Denmark")%>%
+  group_by(year)%>%
+  do(mutate(., mean_CO2_transport = mean(.$CO2_transport_capita)))
+
+
 swe_df <- sample_df%>%
   filter(country == "Sweden")
 
 OECD_sample <- data.frame(year = sample_avg$year,country = rep("Sample Countries",230),CO2_transport_capita = sample_avg$mean_CO2_transport)
 OECD_sample <- OECD_sample[!duplicated(OECD_sample), ]
+
+#new try contd
+ska_sample <- data.frame(year = sample_avg_ska$year,country = rep("Scandinavian",92),CO2_transport_capita = sample_avg_ska$mean_CO2_transport)
+ska_sample <- ska_sample[!duplicated(ska_sample), ]
 
 
 #Plot all countries' data from Sample + smooth (?)
@@ -227,6 +239,31 @@ task_3_plot_2 <- ggplot2::ggplot(data = OECD_sample,
 task_3_plot_2
 
 ggsave("task_3_plot_2.pdf")
+
+#Plot with Sweden and Skandinavian
+
+task_3_plot_3 <- ggplot2::ggplot(data = ska_sample,
+                                 aes(year, CO2_transport_capita,
+                                     group = country,
+                                     color = country))+
+  geom_line()+
+  geom_line(data = swe_df, aes(year, CO2_transport_capita))+
+  geom_vline(xintercept = 1990, linetype = "dotted",size=1)+
+  annotate("text", x = 1982, y = 1.1, label = "VAT + Carbon Tax")+
+  coord_cartesian(xlim = c(1960,2005), ylim = c(0.0,3.0),expand = FALSE)+
+  xlab("")+
+  ylab("Metric tons per capita (CO2 from transport)")+
+  scale_colour_discrete('Transport Sectors')+
+  theme(axis.line = element_line(size = 0.3,
+                                 linetype = "solid"), axis.text.y = element_text(size = 10,
+                                                                                 vjust = 0.25), plot.title = element_text(family = "Helvetica"))+ 
+  labs(x = NULL) + theme(plot.title = element_text(family = "serif"))
+
+
+task_3_plot_3
+
+ggsave("task_3_plot_3.pdf")
+
 
 
 #Nr. 5 -----
