@@ -25,7 +25,7 @@ CO2_data <- read_dta("Data/CO2_Graph.dta")
 
 
 #Nr. 2 ------
-figure_3 <- ggplot2::ggplot(data = CO2_data,
+figure_2 <- ggplot2::ggplot(data = CO2_data,
                             mapping = aes(year)
                             )+
   geom_line(aes(y=CO2_OECD,lty = 'OECD'))+
@@ -34,15 +34,16 @@ figure_3 <- ggplot2::ggplot(data = CO2_data,
   coord_cartesian(xlim = c(1960,2005), ylim = c(0.0,3.0),expand = FALSE)+
   xlab("")+
   ylab("Metric tons per capita (CO2 from transport)")+
-  labs(title = "CARBON TAXES AND CO2 EMISSIONS")+
   geom_vline(xintercept = 1990, linetype = "dotted",size=1)+
   annotate("text", x = 1984, y = 0.8, label = "VAT + Carbon Tax")+
   theme(axis.line = element_line(size = 0.3,
-    linetype = "solid"), axis.text.y = element_text(size = 12,
+    linetype = "solid"), axis.text.y = element_text(size = 10,
     vjust = 0.25), plot.title = element_text(family = "Helvetica"))+ 
-  labs(x = NULL)
-figure_3
+  labs(x = NULL) + theme(plot.title = element_text(family = "serif"))
 
+figure_2
+
+ggsave("figure_2.pdf")
 
 #Nr. 3 -------
 
@@ -63,8 +64,12 @@ carbontax_data_sample_post <- carbontax_data_sample %>%
 
 avg_table_pre <- matrix(c(1:36), ncol=6, byrow=TRUE)
 colnames(avg_table_pre) <- c('Sweden','Denmark','Finland','Norway','Germany','France')
-rownames(avg_table_pre) <- c('CO2 from transport (in metric tons)','GDP per capita (PPP, 2005)','Gasoline consumption per capita (in kilograms of oil equivalent)', 
-                            'Motor vehicles (per 1,000 people)', 'Urban population (as percentage of total population)','Population density (people per square km)')
+rownames(avg_table_pre) <- c('CO2 from transport','GDP per capita','Gasoline consumption per capita', 
+'Motor vehicles (per 1,000 people)', 'Urban population','Population density')
+
+
+#rownames(avg_table_pre) <- c('CO2 from transport (in metric tons)','GDP per capita (PPP, 2005)','Gasoline consumption per capita (in kilograms of oil equivalent)', 
+#                            'Motor vehicles (per 1,000 people)', 'Urban population (as percentage of total population)','Population density (people per square km)')
 
 avg_table_post <- matrix(c(1:36), ncol=6, byrow=TRUE)
 colnames(avg_table_post) <- c('Sweden','Denmark','Finland','Norway','Germany','France')
@@ -125,6 +130,28 @@ avg_table_pre
 avg_table_post
 
 
+#Table to show CO2 transport emissions in 3 points in time
+
+table_3 <- matrix(c(1:18), ncol=6, byrow=TRUE)
+colnames(table_3) <- c('Denmark','Finland','France','Germany','Norway','Sweden')
+rownames(table_3) <- c('CO2 from transport (in metric tons) 1989','CO2 from transport (in metric tons) 1980',
+                             'CO2 from transport (in metric tons) 1970')
+
+
+CO2_1970 <- carbontax_data_sample%>%
+  filter(year==1970)
+CO2_1980 <- carbontax_data_sample%>%
+  filter(year==1980)
+CO2_1989 <- carbontax_data_sample%>%
+  filter(year==1989)
+
+table_3[3,] <- CO2_1970$CO2_transport_capita
+table_3[2,] <- CO2_1980$CO2_transport_capita
+table_3[1,] <- CO2_1989$CO2_transport_capita
+
+table_3
+
+stargazer(table_3, avg_table_pre)
 
 #TASK 4 -----------------
 
@@ -159,11 +186,21 @@ task_3_plot_1 <- ggplot2::ggplot(data=carbontax_data_sample,
                                  aes(year,CO2_transport_capita,
                                      group = country,
                                      color = country))+
-  #geom_smooth(se=F,linetype = "dashed",size=0.15)+#dashed line that shows prediction of regression for each country
   geom_line()+#straight line that connects data points of each country
-  geom_vline(xintercept = 1990, linetype = "dotted",size=0.2)#Sweden Treatment
+  geom_vline(xintercept = 1990, linetype = "dotted",size=1)+
+  annotate("text", x = 1983, y = 0.9, label = "VAT + Carbon Tax")+
+  coord_cartesian(xlim = c(1960,2005), ylim = c(0.0,3.0),expand = FALSE)+
+  xlab("")+
+  ylab("Metric tons per capita (CO2 from transport)")+
+  scale_colour_discrete('Transport Sectors')+
+  theme(axis.line = element_line(size = 0.3,
+                                 linetype = "solid"), axis.text.y = element_text(size = 10,
+                                                                                 vjust = 0.25), plot.title = element_text(family = "Helvetica"))+ 
+  labs(x = NULL) + theme(plot.title = element_text(family = "serif"))
 
 task_3_plot_1
+
+ggsave("task_3_plot_1.pdf")
 
 #Plot with Sweden and Rest of Sample Countries
 
@@ -173,9 +210,21 @@ task_3_plot_2 <- ggplot2::ggplot(data = OECD_sample,
                                      color = country))+
   geom_line()+
   geom_line(data = swe_df, aes(year, CO2_transport_capita))+
-  geom_vline(xintercept = 1990, linetype = "dotted",size=0.2)#Sweden Treatment
+  geom_vline(xintercept = 1990, linetype = "dotted",size=1)+
+  annotate("text", x = 1982, y = 1.1, label = "VAT + Carbon Tax")+
+  coord_cartesian(xlim = c(1960,2005), ylim = c(0.0,3.0),expand = FALSE)+
+  xlab("")+
+  ylab("Metric tons per capita (CO2 from transport)")+
+  scale_colour_discrete('Transport Sectors')+
+  theme(axis.line = element_line(size = 0.3,
+                               linetype = "solid"), axis.text.y = element_text(size = 10,
+                                                                               vjust = 0.25), plot.title = element_text(family = "Helvetica"))+ 
+  labs(x = NULL) + theme(plot.title = element_text(family = "serif"))
+
 
 task_3_plot_2
+
+ggsave("task_3_plot_2.pdf")
 
 
 #Nr. 5 -----
