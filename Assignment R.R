@@ -10,10 +10,11 @@
 
 #Libraries --------
 #install.packages("haven")
+#install.packages("stargazer")
 library (haven)
 library(ggplot2)
 library(dplyr)
-
+library(stargazer)
 library(tidyverse)
 library(sandwich)
 library(lmtest)
@@ -63,12 +64,12 @@ carbontax_data_sample_post <- carbontax_data_sample %>%
 avg_table_pre <- matrix(c(1:36), ncol=6, byrow=TRUE)
 colnames(avg_table_pre) <- c('Sweden','Denmark','Finland','Norway','Germany','France')
 rownames(avg_table_pre) <- c('CO2 from transport (in metric tons)','GDP per capita (PPP, 2005)','Gasoline consumption per capita (in kilograms of oil equivalent)', 
-                            'Motor vehicles (per 1,000 people)', 'Urban population (as percentage of total population)','Population density')
+                            'Motor vehicles (per 1,000 people)', 'Urban population (as percentage of total population)','Population density (people per square km)')
 
 avg_table_post <- matrix(c(1:36), ncol=6, byrow=TRUE)
 colnames(avg_table_post) <- c('Sweden','Denmark','Finland','Norway','Germany','France')
 rownames(avg_table_post) <- c('CO2 from transport (in metric tons)','GDP per capita (PPP, 2005)','Gasoline consumption per capita (in kilograms of oil equivalent)', 
-                             'Motor vehicles (per 1,000 people)', 'Urban population (as percentage of total population)','Population density')
+                             'Motor vehicles (per 1,000 people)', 'Urban population (as percentage of total population)','Population density (people per square km)')
 
 #pre
 swe_df_pre <- carbontax_data_sample_pre%>%
@@ -196,29 +197,53 @@ coeftest(reg1, vcov = vcovHAC(reg1)) #using heteroskedasticity and autocorrelati
 #Treatment Dummy is highly significant
 #sweden_indicator is NA because there are too many dummy variables
 
+reg1_alter <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno- country, data = carbontax_working)
+summary(reg1_alter)
+robust_coef1 <- coeftest(reg1_alter, vcov = vcovHAC(reg1))
 
 reg2_sample <- carbontax_working %>%
   filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Germany" | country == "France" | country == "Denmark")
 
-reg2 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = reg2_sample)
+reg2 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno - country, data = reg2_sample)
 summary(reg2)
-coeftest(reg2, vcov = vcovHAC(reg2)) #using robust standard errors
+robust_coef2 <- coeftest(reg2, vcov = vcovHAC(reg2)) #using robust standard errors
 #Treatment Dummy is highly significant but lower in value
 
 
 reg3_sample <- carbontax_working %>%
   filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
 
-reg3 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno, data = reg3_sample)
+reg3 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno - country, data = reg3_sample)
 summary(reg3)
-coeftest(reg3, vcov = vcovHAC(reg3))
+robust_coef3 <- coeftest(reg3, vcov = vcovHAC(reg3))
 #Treatment Dummy is still significant
 
 
 reg4_sample <- carbontax_working %>%
   filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
 
-reg4 <- lm(CO2_transport_capita ~ country + year + sweden_indicator + post_indicator + post_indicator*sweden_indicator, data = reg4_sample)
+reg4 <- lm(CO2_transport_capita ~ year + sweden_indicator + post_indicator + post_indicator*sweden_indicator, data = reg4_sample)
 summary(reg4)
-coeftest(reg4, vcov = vcovHAC(reg4))
+robust_coef4 <- coeftest(reg4, vcov = vcovHAC(reg4))
 #Treatment Dummy is still significant
+
+unique(carbontax_data$country)
+
+ggplot(data = carbontax_data, aes(x = year, y = CO2_transport_capita))+
+  geom_smooth() +
+  geom_point()
+
+ggplot(reg4_sample, aes(x = year, y = CO2_transport_capita)) +
+  geom_smooth(data = reg4_sample, method = reg4)
+
+##Exporting the Regressions ----------
+
+stargazer(robust_coef1, robust_coef2, robust_coef3, robust_coef4)
+
+
+
+
+
+
+
+
