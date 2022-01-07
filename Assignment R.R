@@ -179,7 +179,7 @@ sample_avg <- sample_df%>%
 
 #new try
 sample_avg_ska <- sample_df%>%
-  filter(country == "Norway" | country == "Denmark")%>%
+  filter(country == "Norway" | country == "Denmark" | country == "Finland")%>%
   group_by(year)%>%
   do(mutate(., mean_CO2_transport = mean(.$CO2_transport_capita)))
 
@@ -191,7 +191,7 @@ OECD_sample <- data.frame(year = sample_avg$year,country = rep("Sample Countries
 OECD_sample <- OECD_sample[!duplicated(OECD_sample), ]
 
 #new try contd
-ska_sample <- data.frame(year = sample_avg_ska$year,country = rep("Scandinavian",92),CO2_transport_capita = sample_avg_ska$mean_CO2_transport)
+ska_sample <- data.frame(year = sample_avg_ska$year,country = rep("Scandinavian",138),CO2_transport_capita = sample_avg_ska$mean_CO2_transport)
 ska_sample <- ska_sample[!duplicated(ska_sample), ]
 
 
