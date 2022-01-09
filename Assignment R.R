@@ -57,7 +57,7 @@ carbontax_data_sample <- carbontax_data%>%
 countries <- c("Sweden","Denmark","Finland","Norway","Germany","France")
 
 
-#Data for Table of pre- and post-treatment averages
+##Data for Table of pre- and post-treatment averages------
 carbontax_data_sample_pre <- carbontax_data_sample %>%
   filter(year <= 1989 & year >= 1980)
 
@@ -130,7 +130,7 @@ avg_table_pre
 avg_table_post
 
 
-#Table to show CO2 transport emissions in 3 points in time
+##Table to show CO2 transport emissions in 3 points in time---------
 
 table_3 <- matrix(c(1:18), ncol=6, byrow=TRUE)
 colnames(table_3) <- c('Denmark','Finland','France','Germany','Norway','Sweden')
@@ -157,7 +157,7 @@ stargazer(table_3, avg_table_pre)
 
 #Plot Sweden and Average of all other countries in sample
 
-#Create Data Frame with mean of all other countries but Sweden
+##Create Data Frame with mean of all other countries but Sweden--------
 
 sample_df <- as.data.frame(do.call(cbind,carbontax_data_sample))
 sapply(sample_df, class)
@@ -192,7 +192,7 @@ ska_sample <- data.frame(year = sample_avg_ska$year,country = rep("Scandinavian"
 ska_sample <- ska_sample[!duplicated(ska_sample), ]
 
 
-#Plot all countries' data from Sample + smooth (?)
+##Plot all countries' data from Sample + smooth (?) --------
 task_3_plot_1 <- ggplot2::ggplot(data=carbontax_data_sample,
                                  aes(year,CO2_transport_capita,
                                      group = country,
@@ -213,7 +213,7 @@ task_3_plot_1
 
 ggsave("task_3_plot_1.pdf")
 
-#Plot with Sweden and Rest of Sample Countries
+##Plot with Sweden and Rest of Sample Countries-------
 
 task_3_plot_2 <- ggplot2::ggplot(data = OECD_sample,
                                  aes(year, CO2_transport_capita,
@@ -237,7 +237,7 @@ task_3_plot_2
 
 ggsave("task_3_plot_2.pdf")
 
-#Plot with Sweden and Skandinavian
+##Plot with Sweden and Skandinavian--------
 
 task_3_plot_3 <- ggplot2::ggplot(data = ska_sample,
                                  aes(year, CO2_transport_capita,
@@ -282,7 +282,7 @@ coeftest(reg1, vcov = vcovHAC(reg1)) #using heteroskedasticity and autocorrelati
 #Treatment Dummy is highly significant
 #sweden_indicator is NA because there are too many dummy variables
 
-reg1_alter <- lm(CO2_transport_capita ~ . + year*post_indicator + post_indicator*sweden_indicator - Countryno- country, data = carbontax_working)
+reg1_alter <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno- country, data = carbontax_working)
 summary(reg1_alter)
 robust_coef1 <- coeftest(reg1_alter, vcov = vcovHAC(reg1_alter))
 robust_coef1
@@ -290,7 +290,7 @@ robust_coef1
 reg2_sample <- carbontax_working %>%
   filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Germany" | country == "France" | country == "Denmark")
 
-reg2 <- lm(CO2_transport_capita ~ . + year*post_indicator + post_indicator*sweden_indicator - Countryno - country, data = reg2_sample)
+reg2 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno - country, data = reg2_sample)
 summary(reg2)
 robust_coef2 <- coeftest(reg2, vcov = vcovHAC(reg2)) #using robust standard errors
 robust_coef2
@@ -300,37 +300,22 @@ robust_coef2
 reg3_sample <- carbontax_working %>%
   filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
 
-reg3 <- lm(CO2_transport_capita ~ . + year*post_indicator + post_indicator*sweden_indicator - Countryno - country, data = reg3_sample)
+reg3 <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno - country, data = reg3_sample)
 summary(reg3)
 robust_coef3 <- coeftest(reg3, vcov = vcovHAC(reg3))
 robust_coef3
 #Treatment Dummy is still significant
 
-reg3_sample <- carbontax_working %>%
-  filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
-
-reg3_interact <- lm(CO2_transport_capita ~ . + post_indicator*sweden_indicator - Countryno - country + year*post_indicator, data = reg3_sample)
-summary(reg3_interact)
-robust_coef3_interact <- coeftest(reg3_interact, vcov = vcovHAC(reg3_interact))
-robust_coef3_interact
-
 reg4_sample <- carbontax_working %>%
   filter(country == "Sweden" | country == "Finland" | country == "Norway" | country == "Denmark")
 
-reg4 <- lm(CO2_transport_capita ~ year + sweden_indicator + post_indicator + year*post_indicator + post_indicator*sweden_indicator, data = reg4_sample)
+reg4 <- lm(CO2_transport_capita ~ year + sweden_indicator + post_indicator + post_indicator*sweden_indicator, data = reg4_sample)
 summary(reg4)
 robust_coef4 <- coeftest(reg4, vcov = vcovHAC(reg4))
 robust_coef4
 #Treatment Dummy is still significant
 
 unique(carbontax_data$country)
-
-ggplot(data = carbontax_data, aes(x = year, y = CO2_transport_capita))+
-  geom_smooth() +
-  geom_point()
-
-ggplot(reg4_sample, aes(x = year, y = CO2_transport_capita)) +
-  geom_smooth(data = reg4_sample, method = reg4)
 
 ##Exporting the Regressions ----------
 
